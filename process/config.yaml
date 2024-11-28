@@ -1,0 +1,7 @@
+Enable: True
+General:
+  communes: ["Bruxelles-Ville", "Anderlecht"] # ["Auderghem","Anderlecht","Uccle","Berchem-Saint-Agathe","Bruxelles-Ville","Etterbeek","Evere","Jette","Forest","Ganshoren","Ixelles","Koekelberg","Molenbeek-Saint-Jean","Saint-Gilles","Schaerbeek","Watermel-Boitsfort","Woluwe-Saint-Lambert","Woluwe-Saint-Pierre","Saint-Josse-Ten-Noode"]
+Get_weather_data:
+  first_day: "2022-05-22" # Datetime or "Yesterday"
+  last_day: "2024-11-22" # Datetime or "Max"
+  

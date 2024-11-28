@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map of Brussels</title>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .legend {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            max-width: 300px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .legend-item span {
+            word-wrap: break-word;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Map of Brussels</h1>
+    <div class="legend">
+        <h3>Legend - Air quality</h3>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #00FF00;"></div>
+            <span>No health impact</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #c4ff33;"></div>
+            <span>Negligible health impact</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ffff33;"></div>
+            <span>Sensitive groups slightly affected</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ffca33;"></div>
+            <span>Breathing difficulties for sensitive groups</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ff8d33;"></div>
+            <span>Respiratory symptoms visible in sensitive<br>
+                groups and early impact on the general public</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ff5233;"></div>
+            <span>Serious effects on sensitive groups<br>
+                and inconvenience for all</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #FF0000;"></div>
+            <span>Dangerous for sensitive groups and<br>
+                the onset of serious effects in healthy people</span>
+        </div>
+    </div>
+    <div id="map-container">
+        <object id="brussels-map" data="Bruxelles_map.svg" type="image/svg+xml"></object>
+    </div>
+    <script>
+        async function fetchAirQualityData() {
+            try {
+                const response = await fetch('../data/General/air_quality.json');
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des données');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur:', error);
+                return null;
+            }
+        }
+
+        function getColorForQuality(value) {
+            if (value <= 5) return "#00FF00";
+            if (value <= 10) return "#c4ff33";
+            if (value <= 17.5) return "#ffff33";
+            if (value <= 25) return "#ffca33";
+            if (value <= 50) return "#ff8d33";
+            if (value <= 75) return "#ff5233";
+            return "#FF0000";
+        }
+
+        const svgObject = document.getElementById("brussels-map");
+        svgObject.addEventListener("load", async () => {
+            const airQualityData = await fetchAirQualityData();
+            if (!airQualityData) {
+                console.error('Air quality data could not be loaded.');
+                return;
+            }
+
+            const svgDoc = svgObject.contentDocument;
+            for (const [communeId, quality] of Object.entries(airQualityData)) {
+                const element = svgDoc.getElementById(communeId);
+                if (element) {
+                    element.style.fill = getColorForQuality(quality);
+                    element.style.cursor = "pointer";
+
+                    element.addEventListener("click", () => {
+                        window.location.href = `details.html?commune=${communeId}`;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

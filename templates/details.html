@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commune</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .input-container {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="commune-name">-</h1>
+
+    <div class="input-container">
+        <input type="text" id="question-input" placeholder="Enter your question here" />
+        <button onclick="sendQuestion()">Ask</button>
+    </div>
+
+    <div id="project-results" class="results">
+        <p>Waiting for your question...</p>
+    </div>
+
+    <script>
+        // Fonction pour obtenir les paramètres d'URL
+        function getURLParams() {
+            const params = {};
+            const queryString = window.location.search.slice(1);
+            const pairs = queryString.split("&");
+            for (const pair of pairs) {
+                const [key, value] = pair.split("=");
+                params[key] = decodeURIComponent(value);
+            }
+            return params;
+        }
+
+        // Fonction pour envoyer une question à l'API
+        async function sendQuestion() {
+            const resultsDiv = document.getElementById("project-results");
+            const questionInput = document.getElementById("question-input");
+            const question = questionInput.value.trim(); // Obtenez la valeur de l'input
+            const communeName = params.commune || "Not specified";
+
+            if (!question) {
+                resultsDiv.innerHTML = `<p>Please enter a question.</p>`;
+                return;
+            }
+
+            try {
+                resultsDiv.innerHTML = `<p>Loading response for "${communeName}:${question}"...</p>`;
+
+                // Construire l'URL pour l'API Flask
+                const response = await fetch(`http://127.0.0.1:5000/ask?question=${communeName}:${question}`);
+
+                // Vérifier si la réponse est correcte
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                // Convertir la réponse en JSON
+                const data = await response.json();
+
+                // Afficher les résultats
+                resultsDiv.innerHTML = `
+                    <p>Response:</p>
+                    <p>${data.response.output}</p>`;
+            } catch (error) {
+                // Gestion des erreurs
+                console.error(`Failed to fetch response: ${error.message}`);
+                resultsDiv.innerHTML = `<p>Failed to fetch response: ${error.message}</p>`;
+            }
+        }
+
+        // Récupération des paramètres
+        const params = getURLParams();
+        const communeName = params.commune || "Not specified";
+
+        // Mise à jour du contenu de la page
+        document.getElementById("commune-name").textContent = communeName;
+    </script>
+</body>
+</html>

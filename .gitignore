@@ -1,0 +1,7 @@
+# fichier
+.env
+# dossier
+venv
+.vscode
+.idea
+_pycache_
